@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ===== HEAD FRAGMENT ===== -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Chadwick &amp; Associates Law Firm - Case Management System"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Playfair+Display:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+    <link th:href="@{/css/style.css}" rel="stylesheet"/>
+    <title th:text="${title}">Law Firm CMS</title>
+</head>
+
+<!-- ===== NAVBAR FRAGMENT ===== -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="navbar-inner">
+        <div class="brand">
+            <a th:href="@{/dashboard}">Chadwick &amp; Associates</a>
+        </div>
+        <ul class="nav-links">
+            <!-- Dashboard -->
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/dashboard}">Dashboard</a>
+            </li>
+
+            <!-- ADMIN links -->
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/cases}">Cases</a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/invoices}">Invoices</a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/hearings}">Hearings</a>
+            </li>
+            <li sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/users}">Users</a>
+            </li>
+
+            <!-- LAWYER links -->
+            <li sec:authorize="hasRole('LAWYER')">
+                <a th:href="@{/cases}">My Cases</a>
+            </li>
+            <li sec:authorize="hasRole('LAWYER')">
+                <a th:href="@{/invoices}">Invoices</a>
+            </li>
+
+            <!-- STAFF links -->
+            <li sec:authorize="hasRole('STAFF')">
+                <a th:href="@{/cases}">Cases</a>
+            </li>
+            <li sec:authorize="hasRole('STAFF')">
+                <a th:href="@{/hearings}">Hearings</a>
+            </li>
+
+            <!-- CLIENT links -->
+            <li sec:authorize="hasRole('CLIENT')">
+                <a th:href="@{/cases}">My Cases</a>
+            </li>
+            <li sec:authorize="hasRole('CLIENT')">
+                <a th:href="@{/invoices}">My Invoices</a>
+            </li>
+
+            <!-- Notifications -->
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/notifications}">
+                    Notifications
+                    <span class="notification-count"
+                          th:if="${notificationCount != null &amp;&amp; notificationCount > 0}"
+                          th:text="${notificationCount}">0</span>
+                </a>
+            </li>
+
+            <!-- Logout -->
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="logout-btn">Sign Out</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- ===== FOOTER FRAGMENT ===== -->
+<footer th:fragment="footer" class="footer">
+    <p>&#169; 2026 Chadwick &amp; Associates Law Firm &nbsp;&bull;&nbsp; All rights reserved.</p>
+</footer>
+
+</html>

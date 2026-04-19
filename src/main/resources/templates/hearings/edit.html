@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reschedule Hearing - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Reschedule Hearing</h1>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">Update Hearing</div>
+            <form th:action="@{/hearings/{id}/reschedule(id=${hearing.id})}" method="post">
+
+                <div class="form-group">
+                    <label for="hearingDate">New Date &amp; Time</label>
+                    <input type="datetime-local" id="hearingDate" name="hearingDate" class="form-control"
+                           th:value="${hearing.dateTime}" required="required"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Reason / Comments</label>
+                    <textarea id="comments" name="comments" class="form-control" placeholder="Reason for rescheduling"></textarea>
+                </div>
+
+                <div class="actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Reschedule</button>
+
+                    <form th:action="@{/hearings/{id}/adjourn(id=${hearing.id})}" method="post" style="display:inline;">
+                        <input type="hidden" name="reason" value="Adjourned"/>
+                        <button type="submit" class="btn btn-secondary">Adjourn</button>
+                    </form>
+
+                    <form th:action="@{/hearings/{id}/complete(id=${hearing.id})}" method="post" style="display:inline;">
+                        <input type="hidden" name="outcome" value="Completed"/>
+                        <button type="submit" class="btn btn-success">Mark Complete</button>
+                    </form>
+
+                    <a th:href="@{/cases/{id}(id=${hearing.legalCase.id})}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

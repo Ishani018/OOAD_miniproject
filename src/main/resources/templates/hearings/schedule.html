@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Schedule Hearing - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Schedule Hearing</h1>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">New Hearing</div>
+            <form th:action="@{/cases/{id}/hearings/schedule(id=${caseId})}" method="post">
+                <div class="form-group">
+                    <label for="hearingDate">Date &amp; Time</label>
+                    <input type="datetime-local" id="hearingDate" name="hearingDate" class="form-control" required="required"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" class="form-control" placeholder="e.g. Court Room 3, District Court" required="required"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="judgeName">Judge Name</label>
+                    <input type="text" id="judgeName" name="judgeName" class="form-control" placeholder="e.g. Hon. Justice Smith" required="required"/>
+                </div>
+
+                <div class="actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Schedule Hearing</button>
+                    <a th:href="@{/cases/{id}(id=${caseId})}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

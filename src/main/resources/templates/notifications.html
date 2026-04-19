@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Notifications - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Notifications</h1>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="n : ${notifications}" th:style="${!n.read ? 'font-weight:bold;' : ''}">
+                        <td th:text="${n.message}">Notification message</td>
+                        <td th:text="${#temporals.format(n.timestamp, 'dd MMM yyyy HH:mm')}">01 Jan 2026</td>
+                        <td>
+                            <span th:if="${n.read}" class="badge status-COMPLETED">Read</span>
+                            <span th:unless="${n.read}" class="badge status-CREATED">Unread</span>
+                        </td>
+                        <td>
+                            <form th:unless="${n.read}" th:action="@{/notifications/{id}/read(id=${n.id})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-secondary">Mark Read</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${notifications == null || #lists.isEmpty(notifications)}">
+                        <td colspan="4" style="text-align:center; color:var(--text-light);">No notifications.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <a th:href="@{/dashboard}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

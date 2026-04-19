@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Hearings - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Hearings</h1>
+            <p>View all scheduled hearings</p>
+        </div>
+
+        <!-- Flash Messages -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">
+                Hearing List
+                <div style="float: right; font-size: 0.9em; color: var(--text-light);">
+                    Total: <span th:text="${#lists.size(hearings)}">0</span> hearings
+                </div>
+            </div>
+
+            <div th:if="${hearings != null && #lists.size(hearings) > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case</th>
+                            <th>Date &amp; Time</th>
+                            <th>Location</th>
+                            <th>Judge</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="hearing : ${hearings}">
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${hearing.legalCase.id})}" th:text="${hearing.legalCase.caseNumber}">C-001</a>
+                                <br/>
+                                <small th:text="${hearing.legalCase.title}" style="color: var(--text-light);">Case Title</small>
+                            </td>
+                            <td th:text="${#temporals.format(hearing.dateTime, 'dd MMM yyyy HH:mm')}">01 Jan 2026 10:00</td>
+                            <td th:text="${hearing.location}">Courtroom 1</td>
+                            <td th:text="${hearing.judgeName}">Judge Name</td>
+                            <td>
+                                <span th:if="${hearing.status == 'SCHEDULED'}" class="badge" style="background-color: #007bff; color: white;">Scheduled</span>
+                                <span th:if="${hearing.status == 'COMPLETED'}" class="badge" style="background-color: #28a745; color: white;">Completed</span>
+                                <span th:if="${hearing.status == 'ADJOURNED'}" class="badge" style="background-color: #ffc107; color: #000;">Adjourned</span>
+                                <span th:if="${hearing.status == 'CANCELLED'}" class="badge" style="background-color: #dc3545; color: white;">Cancelled</span>
+                                <span th:unless="${hearing.status == 'SCHEDULED' || hearing.status == 'COMPLETED' || hearing.status == 'ADJOURNED' || hearing.status == 'CANCELLED'}" class="badge">[[${hearing.status}]]</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${hearing.legalCase.id})}" class="btn btn-sm btn-secondary">View Case</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${hearings == null || #lists.isEmpty(hearings)}" style="padding: 20px; text-align: center; color: var(--text-light);">
+                <p>No hearings found.</p>
+            </div>
+        </div>
+
+        <div class="actions" style="margin-top: 20px;">
+            <a th:href="@{/dashboard}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

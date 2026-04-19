@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign In - Chadwick &amp; Associates')}"></head>
+<body>
+    <div class="login-page">
+        <div class="login-box">
+
+            <div class="login-brand">
+                <span class="logo-icon">⚖️</span>
+                <h1>Chadwick &amp; Associates</h1>
+                <p>Case Management System</p>
+            </div>
+
+            <div class="alert alert-success" th:if="${param.registered}">
+                <p>Registration successful. Please sign in.</p>
+            </div>
+            <div class="alert alert-success" th:if="${param.logout}">
+                <p>You have been signed out successfully.</p>
+            </div>
+            <div class="alert alert-error" th:if="${param.error}">
+                <p>Invalid email or password. Please try again.</p>
+            </div>
+            <div class="alert alert-error" th:if="${param.locked}">
+                <p>Your account has been locked. Please contact an administrator.</p>
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Email Address</label>
+                    <input type="email" id="username" name="username"
+                           class="form-control"
+                           placeholder="name@lawfirm.com"
+                           required="required" autocomplete="email"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           class="form-control"
+                           placeholder="••••••••"
+                           required="required" autocomplete="current-password"/>
+                </div>
+                <div class="form-group" style="margin-top: 24px;">
+                    <button type="submit" id="signin-btn" class="btn btn-primary btn-full">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+
+            <div class="login-footer">
+                <a th:href="@{/register}">New client? Register here</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

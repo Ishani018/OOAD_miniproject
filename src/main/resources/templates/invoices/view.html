@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Invoice Details - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Invoice <span th:text="${invoice.invoiceNumber}">INV-001</span></h1>
+            <div class="actions">
+                <span th:if="${invoice.paid}" class="paid-badge">Paid</span>
+                <span th:unless="${invoice.paid}" class="unpaid-badge">Unpaid</span>
+            </div>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+        <div class="card">
+            <div class="card-header">Invoice Details</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Invoice Number</label>
+                    <p th:text="${invoice.invoiceNumber}">INV-001</p>
+                </div>
+                <div class="detail-item">
+                    <label>Case</label>
+                    <p>
+                        <a th:href="@{/cases/{id}(id=${invoice.legalCase.id})}" th:text="${invoice.legalCase.caseNumber}">C-001</a>
+                        &mdash; <span th:text="${invoice.legalCase.title}">Case Title</span>
+                    </p>
+                </div>
+                <div class="detail-item">
+                    <label>Amount</label>
+                    <p style="font-size: 1.3em; font-weight: bold;" th:text="${'$' + #numbers.formatDecimal(invoice.amount, 1, 2)}">$0.00</p>
+                </div>
+                <div class="detail-item">
+                    <label>Billing Type</label>
+                    <p th:text="${invoice.billingType}">HOURLY</p>
+                </div>
+                <div class="detail-item">
+                    <label>Hours</label>
+                    <p th:text="${invoice.hours != null ? invoice.hours : 'N/A'}">0</p>
+                </div>
+                <div class="detail-item">
+                    <label>Rate</label>
+                    <p th:text="${invoice.rate != null ? '$' + #numbers.formatDecimal(invoice.rate, 1, 2) : 'N/A'}">$0.00</p>
+                </div>
+                <div class="detail-item">
+                    <label>Generated Date</label>
+                    <p th:text="${#temporals.format(invoice.generatedDate, 'dd MMM yyyy')}">01 Jan 2026</p>
+                </div>
+                <div class="detail-item">
+                    <label>Due Date</label>
+                    <p th:text="${#temporals.format(invoice.dueDate, 'dd MMM yyyy')}">01 Feb 2026</p>
+                </div>
+                <div class="detail-item">
+                    <label>Status</label>
+                    <p>
+                        <span th:if="${invoice.paid}" class="paid-badge">Paid</span>
+                        <span th:unless="${invoice.paid}" class="unpaid-badge">Unpaid</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions" style="margin-top: 20px;">
+            <form th:unless="${invoice.paid}" th:action="@{/invoices/{id}/pay(id=${invoice.id})}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-success">Pay Invoice</button>
+            </form>
+            <a th:href="@{/cases/{id}(id=${invoice.legalCase.id})}" class="btn btn-secondary">&larr; Back to Case</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

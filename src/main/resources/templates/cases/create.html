@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('New Case - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Create New Case</h1>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <form th:action="@{/cases/create}" method="post">
+                <div class="form-group">
+                    <label for="type">Case Type</label>
+                    <select id="type" name="type" class="form-control" required="required">
+                        <option value="">-- Select Type --</option>
+                        <option value="CIVIL">Civil</option>
+                        <option value="CRIMINAL">Criminal</option>
+                        <option value="CORPORATE">Corporate</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Enter case title" required="required"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" class="form-control" placeholder="Describe the case details"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="lawyerId">Assign Lawyer</label>
+                    <select id="lawyerId" name="lawyerId" class="form-control" required="required">
+                        <option value="">-- Select Lawyer --</option>
+                        <option th:each="lawyer : ${lawyers}" th:value="${lawyer.id}" th:text="${lawyer.name}">Lawyer Name</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="clientId">Assign Client</label>
+                    <select id="clientId" name="clientId" class="form-control" required="required">
+                        <option value="">-- Select Client --</option>
+                        <option th:each="client : ${clients}" th:value="${client.id}" th:text="${client.name}">Client Name</option>
+                    </select>
+                </div>
+
+                <div class="actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Create Case</button>
+                    <a th:href="@{/cases}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

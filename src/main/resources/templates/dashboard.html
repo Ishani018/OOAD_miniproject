@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Dashboard</h1>
+                <p>Welcome back, <span th:text="${userName}" style="color:var(--gold); font-weight:600;">User</span></p>
+            </div>
+            <!-- Admin quick actions -->
+            <div class="actions" th:if="${role == 'ADMIN'}">
+                <a th:href="@{/cases/create}" id="btn-new-case" class="btn btn-primary">+ New Case</a>
+                <a th:href="@{/admin/users/create}" id="btn-new-user" class="btn btn-secondary">+ New User</a>
+            </div>
+            <!-- Lawyer quick actions -->
+            <div class="actions" th:if="${role == 'LAWYER'}">
+                <a th:href="@{/cases}" id="btn-view-cases" class="btn btn-primary">View Cases</a>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- ===== ADMIN VIEW ===== -->
+        <div th:if="${role == 'ADMIN'}">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3 th:text="${totalCases}">0</h3>
+                    <p>Total Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${activeCases}">0</h3>
+                    <p>Active Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${totalUsers}">0</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${pendingInvoices}">0</h3>
+                    <p>Pending Invoices</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Recent Cases</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case #</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Assigned Lawyer</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${recentCases}">
+                            <td style="font-weight:600; color:var(--gold);" th:text="${c.caseNumber}">C-001</td>
+                            <td th:text="${c.title}">Case Title</td>
+                            <td th:text="${c.caseType}">CIVIL</td>
+                            <td>
+                                <span class="badge" th:classappend="'status-' + ${c.status}" th:text="${c.status}">ACTIVE</span>
+                            </td>
+                            <td th:text="${c.assignedLawyer != null ? c.assignedLawyer.name : 'Unassigned'}">Lawyer</td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${c.id})}" class="btn btn-sm btn-secondary">View</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${recentCases == null || #lists.isEmpty(recentCases)}">
+                            <td colspan="6">No cases found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== LAWYER VIEW ===== -->
+        <div th:if="${role == 'LAWYER'}">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3 th:text="${myCases}">0</h3>
+                    <p>My Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${activeCases}">0</h3>
+                    <p>Active</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${upcomingHearings}">0</h3>
+                    <p>Upcoming Hearings</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${pendingInvoices}">0</h3>
+                    <p>Pending Invoices</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">My Assigned Cases</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case #</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Client</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${assignedCases}">
+                            <td style="font-weight:600; color:var(--gold);" th:text="${c.caseNumber}">C-001</td>
+                            <td th:text="${c.title}">Case Title</td>
+                            <td th:text="${c.caseType}">CIVIL</td>
+                            <td>
+                                <span class="badge" th:classappend="'status-' + ${c.status}" th:text="${c.status}">ACTIVE</span>
+                            </td>
+                            <td th:text="${c.client != null ? c.client.name : 'N/A'}">Client Name</td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${c.id})}" class="btn btn-sm btn-secondary">View</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${assignedCases == null || #lists.isEmpty(assignedCases)}">
+                            <td colspan="6">No assigned cases.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== STAFF VIEW ===== -->
+        <div th:if="${role == 'STAFF'}">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3 th:text="${totalCases}">0</h3>
+                    <p>Total Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${upcomingHearings}">0</h3>
+                    <p>Upcoming Hearings</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">All Cases</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case #</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Lawyer</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${recentCases}">
+                            <td style="font-weight:600; color:var(--gold);" th:text="${c.caseNumber}">C-001</td>
+                            <td th:text="${c.title}">Case Title</td>
+                            <td th:text="${c.caseType}">CIVIL</td>
+                            <td>
+                                <span class="badge" th:classappend="'status-' + ${c.status}" th:text="${c.status}">ACTIVE</span>
+                            </td>
+                            <td th:text="${c.assignedLawyer != null ? c.assignedLawyer.name : 'Unassigned'}">Lawyer</td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${c.id})}" class="btn btn-sm btn-secondary">View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Upcoming Hearings</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date &amp; Time</th>
+                            <th>Case</th>
+                            <th>Location</th>
+                            <th>Judge</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="h : ${hearingsList}">
+                            <td th:text="${#temporals.format(h.dateTime, 'dd MMM yyyy HH:mm')}">01 Jan 2026</td>
+                            <td style="font-weight:600; color:var(--gold);" th:text="${h.legalCase.caseNumber}">C-001</td>
+                            <td th:text="${h.location}">Court Room 1</td>
+                            <td th:text="${h.judgeName}">Judge Name</td>
+                            <td>
+                                <span class="badge" th:classappend="'status-' + ${h.status}" th:text="${h.status}">SCHEDULED</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${hearingsList == null || #lists.isEmpty(hearingsList)}">
+                            <td colspan="5">No upcoming hearings.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== CLIENT VIEW ===== -->
+        <div th:if="${role == 'CLIENT'}">
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3 th:text="${myCases}">0</h3>
+                    <p>My Cases</p>
+                </div>
+                <div class="stat-card">
+                    <h3 th:text="${pendingBills}">0</h3>
+                    <p>Pending Bills</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">My Cases</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case #</th>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Lawyer</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="c : ${clientCases}">
+                            <td style="font-weight:600; color:var(--gold);" th:text="${c.caseNumber}">C-001</td>
+                            <td th:text="${c.title}">Case Title</td>
+                            <td th:text="${c.caseType}">CIVIL</td>
+                            <td>
+                                <span class="badge" th:classappend="'status-' + ${c.status}" th:text="${c.status}">ACTIVE</span>
+                            </td>
+                            <td th:text="${c.assignedLawyer != null ? c.assignedLawyer.name : 'Unassigned'}">Lawyer</td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${c.id})}" class="btn btn-sm btn-secondary">View</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${clientCases == null || #lists.isEmpty(clientCases)}">
+                            <td colspan="6">No cases found.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Unpaid Invoices</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Case</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${unpaidInvoices}">
+                            <td style="font-weight:600; color:var(--gold);" th:text="${inv.invoiceNumber}">INV-001</td>
+                            <td th:text="${inv.legalCase.caseNumber}">C-001</td>
+                            <td style="font-weight:600;" th:text="'$' + ${#numbers.formatDecimal(inv.amount, 1, 2)}">$0.00</td>
+                            <td th:text="${#temporals.format(inv.dueDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                            <td><span class="unpaid-badge">Unpaid</span></td>
+                            <td>
+                                <form th:action="@{/invoices/{id}/pay(id=${inv.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Pay Now</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${unpaidInvoices == null || #lists.isEmpty(unpaidInvoices)}">
+                            <td colspan="6">No unpaid invoices. You're all clear! ✓</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

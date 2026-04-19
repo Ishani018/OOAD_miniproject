@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Upload Document - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Upload Document</h1>
+        </div>
+
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">New Document</div>
+            <form th:action="@{/cases/{id}/documents/upload(id=${caseId})}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="documentName">Document Name</label>
+                    <input type="text" id="documentName" name="documentName" class="form-control" placeholder="e.g. Witness Statement" required="required"/>
+                </div>
+
+                <div class="form-group">
+                    <label for="file">Select File</label>
+                    <input type="file" id="file" name="file" class="form-control" required="required"
+                           accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif,.xls,.xlsx,.csv,.zip,.rar"/>
+                    <p style="margin-top:6px; font-size:12px; color:var(--text-light);">
+                        Accepted: PDF, DOC, DOCX, TXT, JPG, PNG, GIF, XLS, XLSX, CSV, ZIP, RAR &mdash; Max 10 MB.
+                        Files will be scanned for viruses after upload.
+                    </p>
+                </div>
+
+                <div class="actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">Upload &amp; Scan Document</button>
+                    <a th:href="@{/cases/{id}(id=${caseId})}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

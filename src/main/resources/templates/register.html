@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Register - Chadwick &amp; Associates')}"></head>
+<body>
+    <div class="login-page">
+        <div class="login-box">
+
+            <div class="login-brand">
+                <span class="logo-icon">⚖️</span>
+                <h1>Chadwick &amp; Associates</h1>
+                <p>Create a client account</p>
+            </div>
+
+            <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/register}" method="post">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name"
+                           class="form-control"
+                           placeholder="Your full name"
+                           required="required" autocomplete="name"/>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email"
+                           class="form-control"
+                           placeholder="name@example.com"
+                           required="required" autocomplete="email"/>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           class="form-control"
+                           placeholder="Choose a strong password"
+                           required="required" autocomplete="new-password"/>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           class="form-control"
+                           placeholder="Repeat your password"
+                           required="required" autocomplete="new-password"/>
+                </div>
+                <input type="hidden" name="role" value="CLIENT"/>
+                <div class="form-group" style="margin-top: 24px;">
+                    <button type="submit" id="register-btn" class="btn btn-primary btn-full">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="login-footer">
+                <a th:href="@{/login}">Already have an account? Sign in</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('My Invoices - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Invoices</h1>
+            <p>View and manage your invoices</p>
+        </div>
+
+        <!-- Flash Messages -->
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <div class="card-header">
+                Invoice List
+                <div style="float: right; font-size: 0.9em; color: var(--text-light);">
+                    Total: <span th:text="${#lists.size(invoices)}">0</span> invoices
+                </div>
+            </div>
+
+            <div th:if="${invoices != null && #lists.size(invoices) > 0}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Case</th>
+                            <th>Amount</th>
+                            <th>Billing Type</th>
+                            <th>Generated Date</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice : ${invoices}">
+                            <td>
+                                <a th:href="@{/invoices/{id}(id=${invoice.id})}" th:text="${invoice.invoiceNumber}">INV-001</a>
+                            </td>
+                            <td>
+                                <a th:href="@{/cases/{id}(id=${invoice.legalCase.id})}" th:text="${invoice.legalCase.caseNumber}">C-001</a>
+                                <br/>
+                                <small th:text="${invoice.legalCase.title}" style="color: var(--text-light);">Case Title</small>
+                            </td>
+                            <td th:text="${'$' + #numbers.formatDecimal(invoice.amount, 1, 2)}">$0.00</td>
+                            <td th:text="${invoice.billingType}">HOURLY</td>
+                            <td th:text="${#temporals.format(invoice.generatedDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                            <td th:text="${#temporals.format(invoice.dueDate, 'dd MMM yyyy')}">01 Feb 2026</td>
+                            <td>
+                                <span th:if="${invoice.paid}" class="badge" style="background-color: #28a745; color: white;">Paid</span>
+                                <span th:unless="${invoice.paid}" class="badge" style="background-color: #ffc107; color: #000;">Unpaid</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/invoices/{id}(id=${invoice.id})}" class="btn btn-sm btn-secondary">View</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${invoices == null || #lists.isEmpty(invoices)}" style="padding: 20px; text-align: center; color: var(--text-light);">
+                <p>No invoices found.</p>
+            </div>
+        </div>
+
+        <div class="actions" style="margin-top: 20px;">
+            <a th:href="@{/dashboard}" class="btn btn-secondary">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

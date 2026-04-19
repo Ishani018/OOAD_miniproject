@@ -1,0 +1,26 @@
+# Build output
+target/
+*.class
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Maven wrapper (if generated)
+!.mvn/wrapper/maven-wrapper.jar
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db

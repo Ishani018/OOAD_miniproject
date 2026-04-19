@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Cases - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Cases</h1>
+            <div class="actions" sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">
+                <a th:href="@{/cases/create}" class="btn btn-primary">New Case</a>
+            </div>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Case #</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Client</th>
+                        <th>Lawyer</th>
+                        <th>Filing Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="c : ${cases}">
+                        <td style="font-weight:600; color:var(--gold);" th:text="${c.caseNumber}">C-001</td>
+                        <td th:text="${c.title}">Case Title</td>
+                        <td th:text="${c.caseType}">CIVIL</td>
+                        <td>
+                            <span class="badge" th:classappend="'status-' + ${c.status}" th:text="${c.status}">ACTIVE</span>
+                        </td>
+                        <td th:text="${c.client != null ? c.client.name : 'N/A'}">Client</td>
+                        <td th:text="${c.assignedLawyer != null ? c.assignedLawyer.name : 'Unassigned'}">Lawyer</td>
+                        <td th:text="${#temporals.format(c.filingDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                        <td>
+                            <div class="actions">
+                                <a th:href="@{/cases/{id}(id=${c.id})}" class="btn btn-sm btn-secondary">View</a>
+                                <a th:href="@{/cases/{id}/edit(id=${c.id})}" class="btn btn-sm btn-primary"
+                                   sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">Edit</a>
+                                <form th:action="@{/cases/{id}/delete(id=${c.id})}" method="post" style="display:inline;"
+                                      sec:authorize="hasRole('ADMIN')"
+                                      onsubmit="return confirm('Are you sure you want to delete this case?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(cases)}">
+                        <td colspan="8">No cases found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

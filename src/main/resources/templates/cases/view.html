@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Case Details - Chadwick &amp; Associates')}"></head>
+<body>
+    <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1>
+                    <span th:text="${legalCase.caseNumber}">C-001</span> &mdash;
+                    <span th:text="${legalCase.title}">Case Title</span>
+                </h1>
+                <span class="badge" th:classappend="'status-' + ${legalCase.status}" th:text="${legalCase.status}">ACTIVE</span>
+            </div>
+            <div class="actions" sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">
+                <a th:href="@{/cases/{id}/edit(id=${legalCase.id})}" class="btn btn-secondary">Edit</a>
+
+                <!-- UNDER_REVIEW → ACTIVE transition -->
+                <form th:if="${legalCase.status.name() == 'UNDER_REVIEW'}"
+                      th:action="@{/cases/{id}/activate(id=${legalCase.id})}"
+                      method="post" style="display:inline;"
+                      onsubmit="return confirm('Activate this case?');">
+                    <button type="submit" class="btn btn-success">✓ Activate</button>
+                </form>
+
+                <!-- UNDER_REVIEW → REJECTED transition -->
+                <form th:if="${legalCase.status.name() == 'UNDER_REVIEW'}"
+                      th:action="@{/cases/{id}/reject(id=${legalCase.id})}"
+                      method="post" style="display:inline;"
+                      onsubmit="return confirm('Reject this case? This cannot be undone.');">
+                    <button type="submit" class="btn btn-danger">✕ Reject</button>
+                </form>
+
+                <!-- ACTIVE → CLOSED transition -->
+                <form th:if="${legalCase.status.name() == 'ACTIVE'}" th:action="@{/cases/{id}/close(id=${legalCase.id})}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">Close Case</button>
+                </form>
+
+                <!-- CLOSED/ARCHIVED → REOPENED/ACTIVE transition -->
+                <form th:if="${legalCase.status.name() == 'CLOSED' or legalCase.status.name() == 'ARCHIVED'}" th:action="@{/cases/{id}/reopen(id=${legalCase.id})}" method="post" style="display:inline-flex; align-items:center; gap:8px;">
+                    <select name="lawyerId" class="form-control" style="width:auto; padding:4px 8px; font-size:13px;">
+                        <option value="">— Keep current lawyer —</option>
+                        <option th:each="l : ${lawyers}" th:value="${l.id}" th:text="${l.name}">Lawyer</option>
+                    </select>
+                    <button type="submit" class="btn btn-success">Reopen Case</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Case Details -->
+        <div class="card">
+            <div class="card-header">Case Details</div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Type</label>
+                    <p th:text="${legalCase.caseType}">CIVIL</p>
+                </div>
+                <div class="detail-item">
+                    <label>Status</label>
+                    <p>
+                        <span class="badge" th:classappend="'status-' + ${legalCase.status}" th:text="${legalCase.status}">ACTIVE</span>
+                    </p>
+                </div>
+                <div class="detail-item">
+                    <label>Filing Date</label>
+                    <p th:text="${#temporals.format(legalCase.filingDate, 'dd MMM yyyy')}">01 Jan 2026</p>
+                </div>
+                <div class="detail-item">
+                    <label>Closing Date</label>
+                    <p th:text="${legalCase.closingDate != null ? #temporals.format(legalCase.closingDate, 'dd MMM yyyy') : 'N/A'}">N/A</p>
+                </div>
+                <div class="detail-item">
+                    <label>Assigned Lawyer</label>
+                    <p th:text="${legalCase.assignedLawyer != null ? legalCase.assignedLawyer.name : 'Unassigned'}">Lawyer Name</p>
+                </div>
+                <div class="detail-item">
+                    <label>Client</label>
+                    <p th:text="${legalCase.client != null ? legalCase.client.name : 'N/A'}">Client Name</p>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <label>Description</label>
+                    <p th:text="${legalCase.description}">Case description goes here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Documents Section ===== -->
+        <div class="card">
+            <div class="section-header">
+                <h3 class="card-header" style="border:none; margin:0; padding:0;">Documents</h3>
+                <a th:href="@{/cases/{id}/documents/upload(id=${legalCase.id})}" class="btn btn-sm btn-primary"
+                   sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">Upload Document</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>File</th>
+                        <th>Version</th>
+                        <th>Upload Date</th>
+                        <th>Scan Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="doc : ${documents}">
+                        <td th:text="${doc.name}">Document Name</td>
+                        <td>
+                            <a th:if="${doc.filePath != null and doc.scanPassed}" th:href="@{/documents/{id}/download(id=${doc.id})}" th:text="${doc.fileName}">file.pdf</a>
+                            <span th:if="${doc.filePath == null or !doc.scanPassed}" th:text="${doc.fileName}">file.pdf</span>
+                        </td>
+                        <td th:text="${doc.version}">1</td>
+                        <td th:text="${#temporals.format(doc.uploadDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                        <td>
+                            <span th:if="${doc.scanStatus != null}" class="badge" th:classappend="'status-' + ${doc.scanStatus}" th:text="${doc.scanStatus}">PENDING</span>
+                            <span th:if="${doc.scanStatus == null and doc.scanned and doc.scanPassed}" class="badge status-COMPLETED">CLEAN</span>
+                            <span th:if="${doc.scanStatus == null and doc.scanned and !doc.scanPassed}" class="badge status-REJECTED">INFECTED</span>
+                            <span th:if="${doc.scanStatus == null and !doc.scanned}" class="badge status-PENDING">PENDING</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/documents/{id}/delete(id=${doc.id})}" method="post" style="display:inline;"
+                                  sec:authorize="hasAnyRole('ADMIN','LAWYER')"
+                                  onsubmit="return confirm('Delete this document?');">
+                                <input type="hidden" name="caseId" th:value="${legalCase.id}"/>
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${documents == null || #lists.isEmpty(documents)}">
+                        <td colspan="6" style="text-align:center; color:var(--text-light);">No documents uploaded.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Hearings Section ===== -->
+        <div class="card">
+            <div class="section-header">
+                <h3 class="card-header" style="border:none; margin:0; padding:0;">Hearings</h3>
+                <a th:href="@{/cases/{id}/hearings/schedule(id=${legalCase.id})}" class="btn btn-sm btn-primary"
+                   sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">Schedule Hearing</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th>Judge</th>
+                        <th>Status</th>
+                        <th>Comments</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="h : ${hearings}">
+                        <td th:text="${#temporals.format(h.dateTime, 'dd MMM yyyy HH:mm')}">01 Jan 2026 10:00</td>
+                        <td th:text="${h.location}">Court Room 1</td>
+                        <td th:text="${h.judgeName}">Judge Name</td>
+                        <td>
+                            <span class="badge" th:classappend="'status-' + ${h.status}" th:text="${h.status}">SCHEDULED</span>
+                        </td>
+                        <td th:text="${h.comments != null ? h.comments : ''}"></td>
+                        <td sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">
+                            <div class="actions" th:if="${h.status == 'SCHEDULED'}">
+                                <a th:href="@{/hearings/{id}/edit(id=${h.id})}" class="btn btn-sm btn-secondary">Reschedule</a>
+                                <form th:action="@{/hearings/{id}/adjourn(id=${h.id})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="reason" value="Adjourned"/>
+                                    <button type="submit" class="btn btn-sm btn-secondary">Adjourn</button>
+                                </form>
+                                <form th:action="@{/hearings/{id}/complete(id=${h.id})}" method="post" style="display:inline;">
+                                    <input type="hidden" name="outcome" value="Completed"/>
+                                    <button type="submit" class="btn btn-sm btn-success">Complete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${hearings == null || #lists.isEmpty(hearings)}">
+                        <td colspan="6" style="text-align:center; color:var(--text-light);">No hearings scheduled.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Invoices Section ===== -->
+        <div class="card">
+            <div class="section-header">
+                <h3 class="card-header" style="border:none; margin:0; padding:0;">Invoices</h3>
+                <a th:href="@{/cases/{id}/invoices/create(id=${legalCase.id})}" class="btn btn-sm btn-primary"
+                   sec:authorize="hasAnyRole('ADMIN','LAWYER','STAFF')">Generate Invoice</a>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Generated</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="inv : ${invoices}">
+                        <td th:text="${inv.invoiceNumber}">INV-001</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(inv.amount, 1, 2)}">$0.00</td>
+                        <td th:text="${inv.billingType}">HOURLY</td>
+                        <td th:text="${#temporals.format(inv.generatedDate, 'dd MMM yyyy')}">01 Jan 2026</td>
+                        <td th:text="${#temporals.format(inv.dueDate, 'dd MMM yyyy')}">01 Feb 2026</td>
+                        <td>
+                            <span th:if="${inv.paid}" class="paid-badge">Paid</span>
+                            <span th:unless="${inv.paid}" class="unpaid-badge">Unpaid</span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <a th:href="@{/invoices/{id}(id=${inv.id})}" class="btn btn-sm btn-secondary">View</a>
+                                <form th:unless="${inv.paid}" th:action="@{/invoices/{id}/pay(id=${inv.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-success">Pay</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${invoices == null || #lists.isEmpty(invoices)}">
+                        <td colspan="7" style="text-align:center; color:var(--text-light);">No invoices generated.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <a th:href="@{/cases}" class="btn btn-secondary">&larr; Back to Cases</a>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
